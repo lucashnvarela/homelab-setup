@@ -1,0 +1,68 @@
+services:
+  jellyfin:
+    container_name: servarr-jellyfin
+    image: jellyfin/jellyfin
+    restart: unless-stopped
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - /docker/jellyfin/config:/config:rw
+      - jellyfin_cache:/cache:rw
+      - /servarr/media:/media:rw
+
+  seerr:
+    container_name: servarr-seerr
+    image: seerr/seerr
+    restart: unless-stopped
+    init: true
+    volumes:
+      - /docker/seerr/config:/app/config:rw
+    environment:
+      TZ: ${TZ}
+    healthcheck:
+      test: wget -qO- --tries=1 localhost:5055/api/v1/status || exit 1
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    depends_on:
+      sonarr:
+        condition: service_healthy
+      radarr:
+        condition: service_healthy
+
+  gluetun:
+    container_name: servarr-gluetun
+    image: qmcgaw/gluetun
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - /docker/gluetun:/gluetun:rw
+      - ./config:/gluetun/auth:ro
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+      UPDATER_PERIOD: 24h
+      VPN_SERVICE_PROVIDER: ${VPN_SERVICE_PROVIDER}
+      VPN_TYPE: ${VPN_TYPE}
+      VPN_PORT_FORWARDING: on
+      WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
+      OPENVPN_USER: ${OPENVPN_USER}
+      OPENVPN_PASSWORD: ${OPENVPN_PASSWORD}
+      DNS_UPSTREAM_RESOLVERS: cloudflare,google,opendns
+
+include:
+  - arr-compose.yml
+  - torrent-compose.yml
+
+volumes:
+  jellyfin_cache:
+
+networks:
+  default:
+    name: gateway_network
+    external: true

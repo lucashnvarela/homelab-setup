@@ -1,0 +1,5 @@
+[[roles]]
+name = "bittorrent_port_forward_gluetun"
+routes = ["GET /v1/portforward"]
+auth = "apikey"
+apikey = ""
