@@ -5,7 +5,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     xcaddy build \
     --with github.com/caddy-dns/porkbun
 
-FROM caddy:latest
+FROM caddy
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 
