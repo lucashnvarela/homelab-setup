@@ -7,7 +7,7 @@ services:
       - 446:445
     volumes:
       - ./config:/etc/samba:ro
-      - /volume1/ps2roms:/mnt/games:rw
+      - /mnt/smb_ps2roms:/mnt/smb_ps2roms:rw
 
 networks:
   default:
