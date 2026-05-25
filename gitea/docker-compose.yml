@@ -16,11 +16,10 @@ services:
       - 1122:22/tcp
     volumes:
       - /docker/gitea/app:/data:rw
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
     environment:
       USER_UID: ${PUID}
       USER_GID: ${PGID}
+      TZ: ${TZ}
       GITEA__server__DOMAIN: git.${DOMAIN}
       GITEA__server__SSH_DOMAIN: git.${DOMAIN}
       GITEA__server__ROOT_URL: https://git.${DOMAIN}/
