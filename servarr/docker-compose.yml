@@ -11,10 +11,14 @@ services:
     restart: unless-stopped
     devices:
       - /dev/dri:/dev/dri
+    ports:
+      - 7359:7359/udp
     volumes:
       - /docker/jellyfin/config:/config:rw
       - jellyfin_cache:/cache:rw
       - /servarr/media:/media:rw
+    environment:
+      JELLYFIN_PublishedServerUrl: https://jellyfin.${DOMAIN}
 
   seerr:
     container_name: seerr
