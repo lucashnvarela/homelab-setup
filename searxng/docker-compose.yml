@@ -1,6 +1,12 @@
+x-healthcheck-parameters: &healthcheck-parameters
+  interval: 30s
+  timeout: 10s
+  start_period: 30s
+  retries: 3
+
 services:
-  app:
-    container_name: searxng-app
+  searxng:
+    container_name: searxng
     image: docker.io/searxng/searxng
     restart: unless-stopped
     networks:
@@ -8,17 +14,14 @@ services:
       - private
     volumes:
       - ./config:/etc/searxng:ro
-      - app_cache:/var/cache/searxng:rw
+      - cache:/var/cache/searxng:rw
     environment:
       SEARXNG_SECRET: ${SEARXNG_SECRET}
       SEARXNG_BASE_URL: https://searxng.${DOMAIN}
       SEARXNG_VALKEY_URL: valkey://valkey:6379/0
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- --tries=1 localhost:8080/healthz | grep 'OK' || exit 1"]
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: wget -qO- --tries=1 http://localhost:8080/healthz
+      <<: *healthcheck-parameters
     depends_on:
       valkey:
         condition: service_healthy
@@ -34,14 +37,11 @@ services:
       - /docker/searxng/valkey/config:/etc/valkey:rw
       - /docker/searxng/valkey/data:/data:rw
     healthcheck:
-      test: ["CMD", "valkey-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: valkey-cli ping
+      <<: *healthcheck-parameters
 
 volumes:
-  app_cache:
+  cache:
 
 networks:
   private:
