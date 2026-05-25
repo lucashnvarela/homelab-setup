@@ -1,13 +1,19 @@
+x-healthcheck-parameters: &healthcheck-parameters
+  interval: 30s
+  timeout: 10s
+  start_period: 30s
+  retries: 3
+
 services:
-  app:
-    container_name: gitea-app
+  gitea:
+    container_name: gitea
     image: docker.gitea.com/gitea
     restart: unless-stopped
     networks:
       - gateway
       - private
     ports:
-      - 2222:22
+      - 1122:22/tcp
     volumes:
       - /docker/gitea/app:/data:rw
       - /etc/timezone:/etc/timezone:ro
@@ -26,11 +32,8 @@ services:
       GITEA__security__SECRET_KEY: ${SECRET_KEY}
       GITEA__security__INTERNAL_TOKEN: ${INTERNAL_TOKEN}
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- --tries=1 localhost:3000/api/healthz | grep -Eo -m 1 '\"status\":\\s\"\\w+\"' | grep '\"pass\"' || exit 1"]
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: wget -qO- --tries=1 http://localhost:3000/api/healthz
+      <<: *healthcheck-parameters
     depends_on:
       database:
         condition: service_healthy
@@ -48,11 +51,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready --username=${POSTGRES_USER} --dbname=${POSTGRES_DB}'"]
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: pg_isready --username=${POSTGRES_USER} --dbname=${POSTGRES_DB}
+      <<: *healthcheck-parameters
 
 networks:
   private:
