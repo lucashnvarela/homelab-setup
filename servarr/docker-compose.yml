@@ -1,6 +1,12 @@
+x-healthcheck-parameters: &healthcheck-parameters
+  interval: 30s
+  timeout: 10s
+  start_period: 30s
+  retries: 3
+
 services:
   jellyfin:
-    container_name: servarr-jellyfin
+    container_name: jellyfin
     image: jellyfin/jellyfin
     restart: unless-stopped
     devices:
@@ -11,7 +17,7 @@ services:
       - /servarr/media:/media:rw
 
   seerr:
-    container_name: servarr-seerr
+    container_name: seerr
     image: seerr/seerr
     restart: unless-stopped
     init: true
@@ -20,11 +26,8 @@ services:
     environment:
       TZ: ${TZ}
     healthcheck:
-      test: wget -qO- --tries=1 localhost:5055/api/v1/status || exit 1
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: wget -qO- --tries=1 http://localhost:5055/api/v1/status
+      <<: *healthcheck-parameters
     depends_on:
       sonarr:
         condition: service_healthy
@@ -32,7 +35,7 @@ services:
         condition: service_healthy
 
   gluetun:
-    container_name: servarr-gluetun
+    container_name: gluetun
     image: qmcgaw/gluetun
     restart: unless-stopped
     cap_add:

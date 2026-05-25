@@ -1,6 +1,6 @@
 services:
   sonarr:
-    container_name: servarr-sonarr
+    container_name: sonarr
     image: lscr.io/linuxserver/sonarr
     restart: unless-stopped
     network_mode: service:gluetun
@@ -13,17 +13,14 @@ services:
       PGID: ${PGID}
       TZ: ${TZ}
     healthcheck:
-      test: curl -fsS localhost:8989/ping || exit 1
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: curl -fsS localhost:8989/ping
+      <<: *healthcheck-parameters
     depends_on:
       gluetun:
         condition: service_healthy
 
   radarr:
-    container_name: servarr-radarr
+    container_name: radarr
     image: lscr.io/linuxserver/radarr
     restart: unless-stopped
     network_mode: service:gluetun
@@ -36,17 +33,14 @@ services:
       PGID: ${PGID}
       TZ: ${TZ}
     healthcheck:
-      test: curl -fsS localhost:7878/ping || exit 1
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: curl -fsS localhost:7878/ping
+      <<: *healthcheck-parameters
     depends_on:
       gluetun:
         condition: service_healthy
 
   prowlarr:
-    container_name: servarr-prowlarr
+    container_name: prowlarr
     image: lscr.io/linuxserver/prowlarr
     restart: unless-stopped
     network_mode: service:gluetun
@@ -57,17 +51,14 @@ services:
       PGID: ${PGID}
       TZ: ${TZ}
     healthcheck:
-      test: curl -fsS localhost:9696/ping || exit 1
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: curl -fsS localhost:9696/ping
+      <<: *healthcheck-parameters
     depends_on:
       gluetun:
         condition: service_healthy
 
   flaresolverr:
-    container_name: servarr-flaresolverr
+    container_name: flaresolverr
     image: ghcr.io/flaresolverr/flaresolverr
     restart: unless-stopped
     network_mode: service:gluetun
@@ -78,11 +69,8 @@ services:
       TZ: ${TZ}
       DISABLE_MEDIA: true
     healthcheck:
-      test: curl -fsS localhost:8191/health || exit 1
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: curl -fsS localhost:8191/health
+      <<: *healthcheck-parameters
     depends_on:
       gluetun:
         condition: service_healthy

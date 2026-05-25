@@ -1,6 +1,6 @@
 services:
   bittorrent:
-    container_name: servarr-bittorrent
+    container_name: bittorrent
     image: lscr.io/linuxserver/qbittorrent
     restart: unless-stopped
     network_mode: service:gluetun
@@ -13,17 +13,14 @@ services:
       TZ: ${TZ}
       WEBUI_PORT: 8088
     healthcheck:
-      test: curl -fsS localhost:8088/api/v2/app/version || exit 1
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: curl -fsS localhost:8088/api/v2/app/version
+      <<: *healthcheck-parameters
     depends_on:
       gluetun:
         condition: service_healthy
 
   bittorrent-port-forward-gluetun:
-    container_name: servarr-bittorrent-port-forward-gluetun
+    container_name: bittorrent-port-forward-gluetun
     image: mjmeli/qbittorrent-port-forward-gluetun-server
     restart: unless-stopped
     volumes:
@@ -31,15 +28,15 @@ services:
     environment:
       QBT_USERNAME: ${QBT_USERNAME}
       QBT_PASSWORD: ${QBT_PASSWORD}
-      QBT_ADDR: http://servarr-gluetun:8088
-      GTN_ADDR: http://servarr-gluetun:8000
+      QBT_ADDR: http://gluetun:8088
+      GTN_ADDR: http://gluetun:8000
       GTN_APIKEY: ${GTN_APIKEY}
     depends_on:
       bittorrent:
         condition: service_healthy
 
   cleanuparr:
-    container_name: servarr-cleanuparr
+    container_name: cleanuparr
     image: ghcr.io/cleanuparr/cleanuparr
     restart: unless-stopped
     volumes:
@@ -50,11 +47,8 @@ services:
       PGID: ${PGID}
       TZ: ${TZ}
     healthcheck:
-      test: curl -fsS localhost:11011/health || exit 1
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: curl -fsS localhost:11011/health
+      <<: *healthcheck-parameters
     depends_on:
       bittorrent:
         condition: service_healthy
