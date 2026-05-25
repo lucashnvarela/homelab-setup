@@ -1,6 +1,12 @@
+x-healthcheck-parameters: &healthcheck-parameters
+  interval: 30s
+  timeout: 10s
+  start_period: 30s
+  retries: 3
+
 services:
-  server:
-    container_name: ntfy-server
+  ntfy:
+    container_name: ntfy
     image: binwiederhier/ntfy
     restart: unless-stopped
     command: serve
@@ -9,7 +15,7 @@ services:
       - gateway
       - private
     volumes:
-      - server_cache:/var/cache/ntfy:rw
+      - cache:/var/cache/ntfy:rw
     environment:
       TZ: ${TZ}
       NTFY_BASE_URL: https://ntfy.${DOMAIN}
@@ -23,11 +29,8 @@ services:
       NTFY_AUTH_TOKENS: ${NTFY_AUTH_TOKENS}
       NTFY_AUTH_ACCESS: ${NTFY_AUTH_ACCESS}
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- --tries=1 localhost:2586/v1/health | grep -Eo '\"healthy\":true' || exit 1"]
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: wget -qO- --tries=1 http://localhost:2586/v1/health
+      <<: *healthcheck-parameters
     depends_on:
       database:
         condition: service_healthy
@@ -45,14 +48,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready --username=${POSTGRES_USER} --dbname=${POSTGRES_DB}'"]
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: pg_isready --username=${POSTGRES_USER} --dbname=${POSTGRES_DB}
+      <<: *healthcheck-parameters
 
 volumes:
-  server_cache:
+  cache:
 
 networks:
   private:
