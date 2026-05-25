@@ -5,6 +5,24 @@ x-healthcheck-parameters: &healthcheck-parameters
   retries: 3
 
 services:
+  seerr:
+    container_name: seerr
+    image: seerr/seerr
+    restart: unless-stopped
+    init: true
+    volumes:
+      - /docker/seerr/config:/app/config:rw
+    environment:
+      TZ: ${TZ}
+    healthcheck:
+      test: wget -qO- --tries=1 http://localhost:5055/api/v1/status
+      <<: *healthcheck-parameters
+    depends_on:
+      sonarr:
+        condition: service_healthy
+      radarr:
+        condition: service_healthy
+
   sonarr:
     container_name: sonarr
     image: lscr.io/linuxserver/sonarr
