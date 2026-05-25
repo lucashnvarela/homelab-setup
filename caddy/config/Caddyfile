@@ -5,66 +5,79 @@
 	}
 }
 
-ntfy.{$DOMAIN} {
-	reverse_proxy ntfy-server:2586
-}
-
-dockhand.{$DOMAIN} {
-	reverse_proxy dockhand-app:3000
-}
-
-git.{$DOMAIN} {
-	reverse_proxy gitea-app:3000
-}
-
-vwarden.{$DOMAIN} {
-	reverse_proxy vaultwarden-app:80
-}
-
-searxng.{$DOMAIN} {
-	reverse_proxy searxng-app:8080
-}
-
-synology.{$DOMAIN} {
-	reverse_proxy 192.168.1.90:5443 {
-		transport http {
-			tls_insecure_skip_verify
-		}
+*.{$DOMAIN} {
+	@technitium host technitium.{$DOMAIN}
+	handle @technitium {
+		reverse_proxy technitium:5380
 	}
-}
 
-jellyfin.{$DOMAIN} {
-	reverse_proxy servarr-jellyfin:8096
-}
+	@dns host dns.{$DOMAIN}
+	handle @dns {
+		reverse_proxy technitium:8053
+	}
 
-seerr.{$DOMAIN} {
-	reverse_proxy servarr-seerr:5055
-}
+	@synology host synology.{$DOMAIN}
+	handle @synology {
+		reverse_proxy 192.168.1.90:5080
+	}
 
-sonarr.{$DOMAIN} {
-	reverse_proxy servarr-gluetun:8989
-}
+	@ntfy host ntfy.{$DOMAIN}
+	handle @ntfy {
+		reverse_proxy ntfy:2586
+	}
 
-radarr.{$DOMAIN} {
-	reverse_proxy servarr-gluetun:7878
-}
+	@dockhand host dockhand.{$DOMAIN}
+	handle @dockhand {
+		reverse_proxy dockhand:3000
+	}
 
-prowlarr.{$DOMAIN} {
-	reverse_proxy servarr-gluetun:9696
-}
+	@git host git.{$DOMAIN}
+	handle @git {
+		reverse_proxy gitea:3000
+	}
 
-bittorrent.{$DOMAIN} {
-	reverse_proxy servarr-gluetun:8088
-}
+	@vaultwarden host vaultwarden.{$DOMAIN}
+	handle @vaultwarden {
+		reverse_proxy vaultwarden:80
+	}
 
-cleanuparr.{$DOMAIN} {
-	reverse_proxy servarr-cleanuparr:11011
-}
+	@searxng host searxng.{$DOMAIN}
+	handle @searxng {
+		reverse_proxy searxng:8080
+	}
 
-https://*.{$DOMAIN}:1443 {
-	respond "OK" 200
-}
+	@jellyfin host jellyfin.{$DOMAIN}
+	handle @jellyfin {
+		reverse_proxy jellyfin:8096
+	}
 
-:80 {
-	respond "OK" 200
+	@seerr host seerr.{$DOMAIN}
+	handle @seerr {
+		reverse_proxy seerr:5055
+	}
+
+	@sonarr host sonarr.{$DOMAIN}
+	handle @sonarr {
+		reverse_proxy gluetun:8989
+	}
+
+	@radarr host radarr.{$DOMAIN}
+	handle @radarr {
+		reverse_proxy gluetun:7878
+	}
+
+	@prowlarr host prowlarr.{$DOMAIN}
+	handle @prowlarr {
+		reverse_proxy gluetun:9696
+	}
+
+	@bittorrent host bittorrent.{$DOMAIN}
+	handle @bittorrent {
+		reverse_proxy gluetun:8088
+	}
+
+	@cleanuparr host cleanuparr.{$DOMAIN}
+	handle @cleanuparr {
+		reverse_proxy cleanuparr:11011
+	}
 }
