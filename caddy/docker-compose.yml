@@ -1,11 +1,13 @@
 services:
-  server:
-    container_name: caddy-server
+  caddy:
+    container_name: caddy
+    image: caddy-porkbun
     build: .
     restart: unless-stopped
     ports:
-      - 80:80
-      - 443:443
+      - 80:80/tcp
+      - 443:443/tcp
+      - 443:443/udp
     volumes:
       - ./config:/etc/caddy:ro
       - /docker/caddy/data:/data:rw
@@ -18,3 +20,6 @@ services:
 networks:
   default:
     name: gateway_network
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
