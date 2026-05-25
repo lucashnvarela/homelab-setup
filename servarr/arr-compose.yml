@@ -1,3 +1,9 @@
+x-healthcheck-parameters: &healthcheck-parameters
+  interval: 30s
+  timeout: 10s
+  start_period: 30s
+  retries: 3
+
 services:
   sonarr:
     container_name: sonarr
