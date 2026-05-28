@@ -4,6 +4,11 @@ x-healthcheck-parameters: &healthcheck-parameters
   start_period: 30s
   retries: 3
 
+x-environment-defaults: &environment-defaults
+  PUID: ${PUID}
+  PGID: ${PGID}
+  TZ: ${TZ}
+
 services:
   seerr:
     container_name: seerr
@@ -33,9 +38,7 @@ services:
       - /servarr/media:/media:rw
       - /servarr/downloads:/downloads:rw
     environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TZ}
+      <<: *environment-defaults
     healthcheck:
       test: curl -fsS localhost:8989/ping
       <<: *healthcheck-parameters
@@ -53,9 +56,7 @@ services:
       - /servarr/media:/media:rw
       - /servarr/downloads:/downloads:rw
     environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TZ}
+      <<: *environment-defaults
     healthcheck:
       test: curl -fsS localhost:7878/ping
       <<: *healthcheck-parameters
@@ -71,9 +72,7 @@ services:
     volumes:
       - /docker/prowlarr/config:/config:rw
     environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TZ}
+      <<: *environment-defaults
     healthcheck:
       test: curl -fsS localhost:9696/ping
       <<: *healthcheck-parameters
@@ -89,8 +88,8 @@ services:
     volumes:
       - /docker/flaresolverr/config:/config:rw
     environment:
-      LOG_LEVEL: debug
       TZ: ${TZ}
+      LOG_LEVEL: debug
       DISABLE_MEDIA: true
     healthcheck:
       test: curl -fsS localhost:8191/health

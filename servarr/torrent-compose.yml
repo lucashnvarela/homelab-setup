@@ -4,14 +4,17 @@ x-healthcheck-parameters: &healthcheck-parameters
   start_period: 30s
   retries: 3
 
+x-environment-defaults: &environment-defaults
+  PUID: ${PUID}
+  PGID: ${PGID}
+  TZ: ${TZ}
+
 services:
   bittorrent:
     container_name: bittorrent
     image: lscr.io/linuxserver/qbittorrent
     restart: unless-stopped
-    network_mode: service:gluetun
-    volumes:
-      - /docker/bittorrent/config:/config:rw
+      <<: *environment-defaults
       - /servarr/downloads:/downloads:rw
     environment:
       PUID: ${PUID}
@@ -49,9 +52,7 @@ services:
       - /docker/cleanuparr/config:/config:rw
       - /servarr/downloads:/downloads:rw
     environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TZ}
+      <<: *environment-defaults
     healthcheck:
       test: curl -fsS localhost:11011/health
       <<: *healthcheck-parameters
