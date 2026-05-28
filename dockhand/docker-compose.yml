@@ -1,6 +1,12 @@
+x-healthcheck-parameters: &healthcheck-parameters
+  interval: 30s
+  timeout: 10s
+  start_period: 30s
+  retries: 3
+
 services:
-  app:
-    container_name: dockhand-app
+  dockhand:
+    container_name: dockhand
     image: fnsys/dockhand
     restart: unless-stopped
     networks:
@@ -28,11 +34,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready --username=${POSTGRES_USER} --dbname=${POSTGRES_DB}'"]
-      interval: 30s
-      timeout: 10s
-      start_period: 30s
-      retries: 3
+      test: pg_isready --username=${POSTGRES_USER} --dbname=${POSTGRES_DB}
+      <<: *healthcheck-parameters
 
 networks:
   private:
