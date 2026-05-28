@@ -4,22 +4,25 @@ x-healthcheck-parameters: &healthcheck-parameters
   start_period: 30s
   retries: 3
 
+x-environment-defaults: &environment-defaults
+  PUID: ${PUID}
+  PGID: ${PGID}
+  TZ: ${TZ}
+
 services:
   gitea:
     container_name: gitea
     image: docker.gitea.com/gitea
     restart: unless-stopped
+    ports:
+      - 1122:22/tcp
     networks:
       - gateway
       - private
-    ports:
-      - 1122:22/tcp
     volumes:
       - /docker/gitea/app:/data:rw
     environment:
-      USER_UID: ${PUID}
-      USER_GID: ${PGID}
-      TZ: ${TZ}
+      <<: *environment-defaults
       GITEA__server__DOMAIN: git.${DOMAIN}
       GITEA__server__SSH_DOMAIN: git.${DOMAIN}
       GITEA__server__ROOT_URL: https://git.${DOMAIN}/
