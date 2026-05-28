@@ -20,11 +20,6 @@ services:
       - downloads:/downloads:rw
     environment:
       <<: *environment-defaults
-      - /servarr/downloads:/downloads:rw
-    environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TZ}
       WEBUI_PORT: 8088
     healthcheck:
       test: curl -fsS localhost:8088/api/v2/app/version
@@ -40,8 +35,6 @@ services:
     volumes:
       - /docker/bittorrent_port_forward_gluetun/config:/config:rw
     environment:
-      QBT_USERNAME: ${QBT_USERNAME}
-      QBT_PASSWORD: ${QBT_PASSWORD}
       QBT_ADDR: http://gluetun:8088
       GTN_ADDR: http://gluetun:8000
       GTN_APIKEY: ${GTN_APIKEY}

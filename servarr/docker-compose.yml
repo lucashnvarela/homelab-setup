@@ -1,3 +1,9 @@
+x-healthcheck-parameters: &healthcheck-parameters
+  interval: 30s
+  timeout: 10s
+  start_period: 30s
+  retries: 3
+
 services:
   jellyfin:
     container_name: jellyfin
@@ -14,6 +20,26 @@ services:
     environment:
       JELLYFIN_PublishedServerUrl: https://jellyfin.${DOMAIN}
 
+  seerr:
+    container_name: seerr
+    image: seerr/seerr
+    restart: unless-stopped
+    init: true
+    volumes:
+      - /docker/seerr/config:/app/config:rw
+    environment:
+      TZ: ${TZ}
+    healthcheck:
+      test: wget -qO- --tries=1 http://localhost:5055/api/v1/status
+      <<: *healthcheck-parameters
+    depends_on:
+      jellyfin:
+        condition: service_healthy
+      sonarr:
+        condition: service_healthy
+      radarr:
+        condition: service_healthy
+
   gluetun:
     container_name: gluetun
     image: qmcgaw/gluetun
@@ -26,8 +52,6 @@ services:
       - /docker/gluetun:/gluetun:rw
       - ./config:/gluetun/auth:ro
     environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
       TZ: ${TZ}
       UPDATER_PERIOD: 24h
       VPN_SERVICE_PROVIDER: ${VPN_SERVICE_PROVIDER}
@@ -36,7 +60,7 @@ services:
       WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
       OPENVPN_USER: ${OPENVPN_USER}
       OPENVPN_PASSWORD: ${OPENVPN_PASSWORD}
-      DNS_UPSTREAM_RESOLVERS: cloudflare,google,opendns
+      DNS_UPSTREAM_RESOLVERS: cloudflare,google
 
 include:
   - arr-compose.yml
