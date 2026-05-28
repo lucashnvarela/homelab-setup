@@ -2,6 +2,11 @@ x-domain-provider-keys: &domain-provider-keys
   PORKBUN_API_KEY: ${PORKBUN_API_KEY}
   PORKBUN_API_SECRET_KEY: ${PORKBUN_API_SECRET_KEY}
 
+x-ntfy-environment: &ntfy-environment
+  HOSTNAME: ${HOSTNAME}
+  NTFY_TOKEN: ${NTFY_TOKEN}
+  NTFY_TOPIC: ${NTFY_TOPIC}
+
 services:
   caddy:
     container_name: caddy
@@ -18,7 +23,7 @@ services:
       - /docker/caddy/config:/config:rw
     environment:
       DOMAIN: ${DOMAIN}
-      <<: *domain-provider-keys
+      <<: [*domain-provider-keys, *ntfy-environment]
 
 networks:
   default:
