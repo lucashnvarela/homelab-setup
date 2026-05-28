@@ -14,6 +14,11 @@ services:
     container_name: bittorrent
     image: lscr.io/linuxserver/qbittorrent
     restart: unless-stopped
+    network_mode: service:gluetun
+    volumes:
+      - /docker/bittorrent/config:/config:rw
+      - downloads:/downloads:rw
+    environment:
       <<: *environment-defaults
       - /servarr/downloads:/downloads:rw
     environment:
@@ -50,7 +55,7 @@ services:
     restart: unless-stopped
     volumes:
       - /docker/cleanuparr/config:/config:rw
-      - /servarr/downloads:/downloads:rw
+      - downloads:/downloads:rw
     environment:
       <<: *environment-defaults
     healthcheck:

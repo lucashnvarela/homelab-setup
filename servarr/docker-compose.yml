@@ -10,7 +10,7 @@ services:
     volumes:
       - /docker/jellyfin/config:/config:rw
       - jellyfin_cache:/cache:rw
-      - /servarr/media:/media:rw
+      - media:/media:rw
     environment:
       JELLYFIN_PublishedServerUrl: https://jellyfin.${DOMAIN}
 
@@ -44,6 +44,14 @@ include:
 
 volumes:
   jellyfin_cache:
+  downloads:
+  media:
+    name: servarr_smb_media
+    driver: local
+    driver_opts:
+      type: cifs
+      device: //${SMB_HOST}/${SMB_SHARE}
+      o: username=${SMB_USERNAME},password=${SMB_PASSWORD},vers=3.0,rw,noatime,uid=${PUID},gid=${PGID}
 
 networks:
   default:
