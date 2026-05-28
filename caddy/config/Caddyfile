@@ -5,10 +5,42 @@
 	}
 }
 
+(sensible-defaults) {
+	encode
+
+	handle_errors {
+		respond "{err.status_code} {err.status_text}"
+	}
+
+	header {
+		-Server
+		-Via
+		-Via-Key
+		-X-Powered-By
+
+		?X-Content-Type-Options "nosniff"
+		?Referrer-Policy "strict-origin-when-cross-origin"
+	}
+}
+
+(reverse-proxy-healthcheck) {
+	health_interval 10s
+	health_timeout 3s
+	fail_duration 10s
+	transport http {
+		dial_timeout 3s
+	}
+}
+
 *.{$DOMAIN} {
+	import sensible-defaults
+
 	@technitium host technitium.{$DOMAIN}
 	handle @technitium {
-		reverse_proxy technitium:5380
+		reverse_proxy technitium:5380 {
+			import reverse-proxy-healthcheck
+			health_uri /
+		}
 	}
 
 	@dns host dns.{$DOMAIN}
@@ -18,66 +50,111 @@
 
 	@synology host synology.{$DOMAIN}
 	handle @synology {
-		reverse_proxy 192.168.1.90:5080
+		reverse_proxy 192.168.1.90:5080 {
+			import reverse-proxy-healthcheck
+			health_uri /
+		}
 	}
 
 	@ntfy host ntfy.{$DOMAIN}
 	handle @ntfy {
-		reverse_proxy ntfy:2586
+		reverse_proxy ntfy:2586 {
+			import reverse-proxy-healthcheck
+			health_uri /v1/health
+		}
 	}
 
 	@dockhand host dockhand.{$DOMAIN}
 	handle @dockhand {
-		reverse_proxy dockhand:3000
+		reverse_proxy dockhand:3000 {
+			import reverse-proxy-healthcheck
+			health_uri /api/health
+			flush_interval -1
+		}
 	}
 
 	@git host git.{$DOMAIN}
 	handle @git {
-		reverse_proxy gitea:3000
+		reverse_proxy gitea:3000 {
+			import reverse-proxy-healthcheck
+			health_uri /api/healthz
+		}
 	}
 
 	@vaultwarden host vaultwarden.{$DOMAIN}
 	handle @vaultwarden {
-		reverse_proxy vaultwarden:80
+		reverse_proxy vaultwarden:80 {
+			import reverse-proxy-healthcheck
+			health_uri /alive
+		}
 	}
 
 	@searxng host searxng.{$DOMAIN}
 	handle @searxng {
-		reverse_proxy searxng:8080
+		reverse_proxy searxng:8080 {
+			import reverse-proxy-healthcheck
+			health_uri /healthz
+		}
 	}
 
 	@jellyfin host jellyfin.{$DOMAIN}
 	handle @jellyfin {
-		reverse_proxy jellyfin:8096
+		reverse_proxy jellyfin:8096 {
+			import reverse-proxy-healthcheck
+			health_uri /health
+			flush_interval -1
+		}
 	}
 
 	@seerr host seerr.{$DOMAIN}
 	handle @seerr {
-		reverse_proxy seerr:5055
+		reverse_proxy seerr:5055 {
+			import reverse-proxy-healthcheck
+			health_uri /api/v1/status
+		}
 	}
 
 	@sonarr host sonarr.{$DOMAIN}
 	handle @sonarr {
-		reverse_proxy gluetun:8989
+		reverse_proxy gluetun:8989 {
+			import reverse-proxy-healthcheck
+			health_uri /ping
+		}
 	}
 
 	@radarr host radarr.{$DOMAIN}
 	handle @radarr {
-		reverse_proxy gluetun:7878
+		reverse_proxy gluetun:7878 {
+			import reverse-proxy-healthcheck
+			health_uri /ping
+		}
 	}
 
 	@prowlarr host prowlarr.{$DOMAIN}
 	handle @prowlarr {
-		reverse_proxy gluetun:9696
+		reverse_proxy gluetun:9696 {
+			import reverse-proxy-healthcheck
+			health_uri /ping
+		}
 	}
 
 	@bittorrent host bittorrent.{$DOMAIN}
 	handle @bittorrent {
-		reverse_proxy gluetun:8088
+		reverse_proxy gluetun:8088 {
+			import reverse-proxy-healthcheck
+			health_uri /api/v2/app/version
+		}
 	}
 
 	@cleanuparr host cleanuparr.{$DOMAIN}
 	handle @cleanuparr {
-		reverse_proxy cleanuparr:11011
+		reverse_proxy cleanuparr:11011 {
+			import reverse-proxy-healthcheck
+			health_uri /health
+		}
+	}
+
+	handle {
+		error 404
 	}
 }
