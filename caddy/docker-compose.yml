@@ -1,3 +1,7 @@
+x-domain-provider-keys: &domain-provider-keys
+  PORKBUN_API_KEY: ${PORKBUN_API_KEY}
+  PORKBUN_API_SECRET_KEY: ${PORKBUN_API_SECRET_KEY}
+
 services:
   caddy:
     container_name: caddy
@@ -14,8 +18,7 @@ services:
       - /docker/caddy/config:/config:rw
     environment:
       DOMAIN: ${DOMAIN}
-      PORKBUN_API_KEY: ${PORKBUN_API_KEY}
-      PORKBUN_API_SECRET_KEY: ${PORKBUN_API_SECRET_KEY}
+      <<: *domain-provider-keys
 
 networks:
   default:
